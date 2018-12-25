@@ -1,0 +1,8 @@
+# .gitignore
+
+# package directory
+elpa
+straight
+
+# auto save; basically it's crap
+auto-save-list
