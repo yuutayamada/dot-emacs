@@ -20,16 +20,6 @@
   (frame-set-background-mode frame))
 (add-hook 'after-make-frame-functions 'Y-set-frame-background)
 
-;;; backup files
-(setq make-backup-files nil)
-
-;; auto save file configuration
-(defconst emacs-tmp-dir
-  (expand-file-name (format "emacs%d" (user-uid)) temporary-file-directory))
-(setq backup-directory-alist `((".*" . ,emacs-tmp-dir))
-      auto-save-file-name-transforms `((".*" ,emacs-tmp-dir t))
-      auto-save-list-file-prefix emacs-tmp-dir)
-
 ;;; straight.el/package-manager
 (defvar bootstrap-version)
 (let ((bootstrap-file
@@ -50,6 +40,21 @@
 
 ;;;; Builtin Packages ;;;;
 (add-hook 'prog-mode-hook 'show-paren-mode)
+
+;; I don't need protection for multiuser editing
+(setq create-lockfiles nil) ; for .#FILEs
+
+;; files.el
+(use-package files
+  :custom
+  ;; for #FILE#s
+  (auto-save-file-name-transforms
+   `(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
+      ,(concat temporary-file-directory "backups/\\2")
+      t)))
+  ;; for ~FILEs
+  (backup-directory-alist
+   `(("." . ,(concat temporary-file-directory "backups")))))
 
 ;; Dired
 ;; looks like this is correct way to load according to dired-x's comment
