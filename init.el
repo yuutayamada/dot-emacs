@@ -2,6 +2,12 @@
 
 ;; todo: check loadup.el, startup process for termux
 
+;;; terminal Emacs configuration
+;; See also `tty-run-terminal-initializeation'
+;; This is mainly to enable to paste from remote client in evil's normal mode.
+;; Emacs already supports brancketed paste mode by default from Emacs 25.
+;; ([200~COPIEDCONTENT] should be handled)
+(add-hook 'tty-setup-hook 'terminal-init-xterm)
 
 ;;; Electric indent mode
 ;; make C-j great again, but use other electric indent bindings
@@ -222,13 +228,21 @@
   (define-key (current-global-map)
     [remap shell-command] 'with-editor-shell-command))
 
+(use-package ivy
+  :bind (("C-h C-h" . ivy-resume))
+  :custom
+  (ivy-use-selectable-prompt t "select current prompt by C-M-j key"))
+
 (use-package counsel
-  :bind (("M-o" . counsel-apropos)
-	 ("M-x" . counsel-M-x)
-	 ("C-x C-f" . counsel-find-file)))
+  :bind (;; C-S-u is not available due to C-u in Emacs NOX
+	 ("C-h u" . counsel-unicode-char))
+  ;; remap counsel functions to some Emacs original binding (e.g, M-x)
+  :init (counsel-mode t))
+
+(use-package swiper :bind (("C-s" . swiper-isearch)))
 
 (use-package git-gutter
-  :hook (find-file git-gutter-mode))
+  :hook (find-file . git-gutter-mode))
 
 (use-package fish-mode
   :hook
