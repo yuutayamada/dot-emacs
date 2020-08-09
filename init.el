@@ -2,10 +2,6 @@
 
 ;; todo: check loadup.el, startup process for termux
 
-;; TODO: C-h
-(global-set-key (kbd "C-h") 'delete-backward-char)
-;; for Japanese keyboard, ¥ -> \
-(define-key key-translation-map (kbd "¥") (kbd "\\"))
 
 ;;; Electric indent mode
 ;; make C-j great again, but use other electric indent bindings
