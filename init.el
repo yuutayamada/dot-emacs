@@ -239,6 +239,15 @@
   :custom
   (ivy-use-selectable-prompt t "select current prompt by C-M-j key"))
 
+(use-package avy
+  ;; somehow Avy wasn't built on built directory, so manually loading...
+  :load-path (lambda ()
+	       (list (format "%sstraight/repos/avy" user-emacs-directory)))
+  ;; Blinkshell supports binding key with Hex codes.
+  ;; I bind <C-;> as Hex codes of x18 x40 x63 x3b (sequence of C-x @ c ;)
+  ;; Emacs translates C-x @ c as control modifier, so it becomes C-; in Emacs.
+  :bind (("C-;" . avy-goto-char)))
+
 (use-package counsel
   :bind (;; C-S-u is not available due to C-u in Emacs NOX
 	 ("C-h u" . counsel-unicode-char))
