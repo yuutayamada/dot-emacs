@@ -52,11 +52,17 @@
   ;; for #FILE#s
   (auto-save-file-name-transforms
    `(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
-      ,(concat temporary-file-directory "backups/\\2")
+      ,(format "%sbackups/\\2" temporary-file-directory)
       t)))
   ;; for ~FILEs
   (backup-directory-alist
-   `(("." . ,(concat temporary-file-directory "backups")))))
+   `(("." . ,(format "%sbackups" temporary-file-directory))))
+  ;; Trashcan
+  (trash-directory (format "%s/Emacs/Trash/" (getenv "XDG_DATA_HOME"))))
+
+(use-package bookmark
+  :custom (bookmark-default-file
+	   (format "%s/Emacs/bookmarks" (getenv "XDG_DATA_HOME"))))
 
 ;; Dired
 ;; looks like this is correct way to load according to dired-x's comment
