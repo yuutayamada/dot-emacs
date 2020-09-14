@@ -1,6 +1,7 @@
 ;; Init.el
 
-;; todo: check loadup.el, startup process for termux
+;; TODO: Check termux issue if 27
+;;   https://github.com/termux/termux-packages/pull/4622
 
 ;;; terminal Emacs configuration
 ;; See also `tty-run-terminal-initializeation'
@@ -124,6 +125,8 @@
   ;; datetree/ string is special, signifying to archive items to datetree.
   ;; %s is replaced original archived file name
   (org-archive-location (concat org-directory "/archive/%s::datetree/"))
+  ;; open archived (:ARCHIVE:) trees by C-tab in NOX
+  (org-cycle-open-archived-trees t)
 
   ;;; Capture; adding org header for new idea you captured
   (org-capture-templates
@@ -140,6 +143,10 @@
      ("c" "Jump to clocked item" plain (clock)
       "" :jump-to-captured t :immediate-finish t)))
 
+  ;; refile
+  ;; can't confirm this...
+  (org-refile-allow-creating-parent-nodes 'confirm); WIP
+  (org-refile-targets '((org-agenda-files :maxlevel . 3))); nest level of *
   ;; GTD stuff
   ;; I don't use (/!), (@), (!) because my work is not picky
   ;; to recording the work.
@@ -166,7 +173,6 @@
   :hook ((lisp-mode . enable-paredit-mode)
 	 (emacs-lisp-mode . enable-paredit-mode)))
 
-;; TODO: screen touch doesn't work except emacs-state from ipad
 ;; TODO: cursor shape change (but mosh doesn't support yet)
 (use-package evil
   :no-require t; :config is loaded when evil is loaded
@@ -264,3 +270,26 @@
   (before-save . fish_indent-before-save)
   :config
   (setq fish-enable-auto-indent t))
+
+;; Functions
+(with-no-warnings
+  ;; For schedule and deadline entries in org-mode, so
+  ;; date, day dayname is predefined before this function is called
+  (defun Y-US-ISM-manufacturing-PMI ()
+    "Predicate function for US ISM manufacturing PMI.
+This function might not reflect accurate day of the indicator.
+Because it ignores US holiday, but should be close to the actual date.
+
+Usage:
+* check the index
+  SCHEDULED: <%%(Y-US-ISM-manufacturing-PMI)>"
+    (let ((dayname (calendar-day-of-week date))
+	  (day (car (cdr date))))
+      (or (and (= day 1)
+               (memq dayname '(1 2 3 4 5)))
+	  (and (eq day 2) (eq dayname 0))
+	  (and (eq day 3) (eq dayname 6))))))
+
+;;; Custom
+(setq custom-file (format "%s/emacs/custom.el" (getenv "XDG_CONFIG_HOME")))
+(load custom-file)
