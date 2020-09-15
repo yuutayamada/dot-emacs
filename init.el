@@ -95,8 +95,25 @@
   (setq recentf-save-file
 	(concat (getenv "XDG_CACHE_HOME") "/emacs/recentf")))
 
+;; TODO: should I `make' if there is org-loaddefs.el?
+(eval-and-compile
+  (defun Y-org-mode-load-path ()
+    (let ((orgdir (format "%sstraight/repos/org" user-emacs-directory)))
+      (if (not (file-exists-p (format "%s/lisp/org-loaddefs.el" orgdir)))
+	  (message "org-loaddefs.el not found in straight's org dir")
+	(when-let ((default-org-dir
+		     (cl-loop for path in load-path
+			      if (string-match "/share/emacs/.*/lisp/org" path)
+			      do (cl-return path))))
+	  (setq load-path (delete default-org-dir load-path))
+	  (list (format "%s/lisp" orgdir)
+		(format "%s/contrib/lisp" orgdir)))))))
+
+;; make is required if you use latest org mode
 (use-package org
   :no-require t
+  :straight org-plus-contrib
+  :load-path (lambda () (Y-org-mode-load-path))
   :init (add-hook 'org-mode-hook 'org-indent-mode)
   :bind (;; `org-capture' has unique behavier with C-u prefix:
 	 ;;   C-u: Visit the target location of a capture template.
