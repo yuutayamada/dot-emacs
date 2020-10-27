@@ -1,7 +1,7 @@
 ;; Init.el
 
-;; TODO: Check termux issue if 27
-;;   https://github.com/termux/termux-packages/pull/4622
+;; Build emacs dump file:
+;;   https://www.gnu.org/software/emacs/manual/html_node/elisp/Building-Emacs.html
 
 ;;; terminal Emacs configuration
 ;; See also `tty-run-terminal-initializeation'
@@ -9,6 +9,7 @@
 ;; Emacs already supports brancketed paste mode by default from Emacs 25.
 ;; ([200~COPIEDCONTENT] should be handled)
 (add-hook 'tty-setup-hook 'terminal-init-xterm)
+(menu-bar-mode -1)
 
 ;;; Electric indent mode
 ;; make C-j great again, but use other electric indent bindings
@@ -22,6 +23,7 @@
   (set-terminal-parameter frame 'background-mode frame-background-mode)
   (frame-set-background-mode frame))
 (add-hook 'after-make-frame-functions 'Y-set-frame-background)
+
 
 ;;; straight.el/package-manager
 (defvar bootstrap-version)
@@ -113,7 +115,7 @@
 (use-package org
   :no-require t
   :straight org-plus-contrib
-  :load-path (lambda () (Y-org-mode-load-path))
+  ;; :load-path (lambda () (Y-org-mode-load-path))
   :init (add-hook 'org-mode-hook 'org-indent-mode)
   :bind (;; `org-capture' has unique behavier with C-u prefix:
 	 ;;   C-u: Visit the target location of a capture template.
@@ -128,7 +130,10 @@
    'org-babel-load-languages
    '((emacs-lisp . t)
      (shell . t)))
+  ;; `org-checklist' for RESET_CHECK_BOXES property
+  (add-to-list 'org-modules 'org-checklist t)
   :custom
+  (org-startup-folded t)
   ;; access org keybind without C-c prefix at begging of header (e.g, *<-)
   (org-use-speed-commands t)
   ;; file/directory related
@@ -145,7 +150,7 @@
   ;; open archived (:ARCHIVE:) trees by C-tab in NOX
   (org-cycle-open-archived-trees t)
 
-  ;;; Capture; adding org header for new idea you captured
+  ;; Capture; adding org header for new idea you captured
   (org-capture-templates
    ;; The list of template element can be:
    ;;   keys, desc, entry/item/checkitem/table-line/plain,
@@ -162,8 +167,8 @@
 
   ;; refile
   ;; can't confirm this...
-  (org-refile-allow-creating-parent-nodes 'confirm); WIP
-  (org-refile-targets '((org-agenda-files :maxlevel . 3))); nest level of *
+  (org-refile-allow-creating-parent-nodes 'confirm)	   ; WIP
+  (org-refile-targets '((org-agenda-files :maxlevel . 3))) ; nest level of *
   ;; GTD stuff
   ;; I don't use (/!), (@), (!) because my work is not picky
   ;; to recording the work.
@@ -263,9 +268,6 @@
   (ivy-use-selectable-prompt t "select current prompt by C-M-j key"))
 
 (use-package avy
-  ;; somehow Avy wasn't built on built directory, so manually loading...
-  :load-path (lambda ()
-	       (list (format "%sstraight/repos/avy" user-emacs-directory)))
   ;; Blinkshell supports binding key with Hex codes.
   ;; I bind <C-;> as Hex codes of x18 x40 x63 x3b (sequence of C-x @ c ;)
   ;; Emacs translates C-x @ c as control modifier, so it becomes C-; in Emacs.
@@ -282,31 +284,23 @@
 (use-package git-gutter
   :hook (find-file . git-gutter-mode))
 
-(use-package fish-mode
-  :hook
-  (before-save . fish_indent-before-save)
-  :config
-  (setq fish-enable-auto-indent t))
+;; (use-package fish-mode
+;;   :hook
+;;   (before-save . fish_indent-before-save)
+;;   :config
+;;   (setq fish-enable-auto-indent t))
 
-;; Functions
-(with-no-warnings
-  ;; For schedule and deadline entries in org-mode, so
-  ;; date, day dayname is predefined before this function is called
-  (defun Y-US-ISM-manufacturing-PMI ()
-    "Predicate function for US ISM manufacturing PMI.
-This function might not reflect accurate day of the indicator.
-Because it ignores US holiday, but should be close to the actual date.
+;; Use TCP for emacsclient.
+;; This is a workaround due to warn level change of fdsun on android11.
+;; (https://github.com/termux/termux-packages/issues/5790)
+(setq server-use-tcp t)
+(server-start t t)
 
-Usage:
-* check the index
-  SCHEDULED: <%%(Y-US-ISM-manufacturing-PMI)>"
-    (let ((dayname (calendar-day-of-week date))
-	  (day (car (cdr date))))
-      (or (and (= day 1)
-               (memq dayname '(1 2 3 4 5)))
-	  (and (eq day 2) (eq dayname 0))
-	  (and (eq day 3) (eq dayname 6))))))
+;; local funcions, etc.
+(let ((mylocal (format "%s/emacs/mylocal.el" (getenv "XDG_CONFIG_HOME"))))
+  (load mylocal t))
 
 ;;; Custom
 (setq custom-file (format "%s/emacs/custom.el" (getenv "XDG_CONFIG_HOME")))
-(load custom-file)
+(load custom-file t)
+
